@@ -1,0 +1,127 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <style>
+
+        html,
+        body {
+            margin: 0;
+            padding: 0;
+            background-color: #1F1F21;
+        }
+
+        .model-container {
+            position: fixed;
+            top: 10%;
+            left: 10%;
+            width: 80%;
+            height: 80vh;
+            border: 1px dotted grey;
+        }
+
+        canvas {
+            display: block;
+        }
+    </style>
+</head>
+<body>
+
+<div class="model-container">
+    <canvas id="device-model"></canvas>
+</div>
+
+
+<script async src="https://unpkg.com/es-module-shims@1.6.3/dist/es-module-shims.js"></script>
+<script type="importmap">
+  {
+    "imports": {
+      "three": "https://unpkg.com/three@0.164.0/build/three.module.min.js",
+      "three/addons/": "https://unpkg.com/three@0.164.0/examples/jsm/"
+    }
+  }
+</script>
+
+<script type="module">
+    import * as THREE from "three";
+    import {GLTFLoader} from "three/addons/loaders/GLTFLoader.js";
+    import {OrbitControls} from "three/addons/controls/OrbitControls.js";
+
+    const containerEl = document.querySelector(".model-container");
+    const canvasEl = document.querySelector("#device-model");
+
+    let renderer, scene, camera, orbit, lightHolder;
+
+
+    initScene();
+    updateSize();
+    window.addEventListener("resize", () => updateSize());
+
+    function initScene() {
+        const modelLoader = new GLTFLoader();
+        scene = new THREE.Scene();
+
+        camera = new THREE.PerspectiveCamera(40, containerEl.clientWidth / containerEl.clientHeight, .01, 10000);
+        camera.position.set(1, 1, 3).multiplyScalar(.85);
+
+        renderer = new THREE.WebGLRenderer({
+            antialias: true,
+            alpha: true,
+            canvas: canvasEl
+        });
+
+        renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
+
+        const ambientLight = new THREE.AmbientLight(0xffffff, .5);
+        scene.add(ambientLight);
+
+        lightHolder = new THREE.Group();
+        scene.add(lightHolder);
+
+        const staticLight = new THREE.DirectionalLight(0xffffff, 25);
+        staticLight.position.set(-16, 7, 6);
+        staticLight.castShadow = true;
+        lightHolder.add(staticLight);
+
+
+        orbit = new OrbitControls(camera, canvasEl);
+        orbit.enableZoom = false;
+        orbit.enableDamping = true;
+        orbit.minPolarAngle = .1 * Math.PI;
+        orbit.maxPolarAngle = .9 * Math.PI;
+
+        const textureLoader = new THREE.TextureLoader()
+
+        modelLoader.load(
+            "./model/2_7.glb",
+            glb => {
+                const normalMap = textureLoader.load('./model/normal-map.jpg')
+                glb.scene.children.forEach(child => {
+                    if (child.name.startsWith("Element_(base)")) {
+                        child.material.normalMap = normalMap;
+                        child.material.normalMap.wrapS = child.material.normalMap.wrapT = THREE.RepeatWrapping;
+                        child.material.normalScale = new THREE.Vector2(.4, -.4);
+                    }
+                });
+
+                scene.add(glb.scene)
+                render();
+            });
+    }
+
+    function updateSize() {
+        camera.aspect = containerEl.clientWidth / containerEl.clientHeight;
+        camera.updateProjectionMatrix();
+        renderer.setSize(containerEl.clientWidth, containerEl.clientHeight);
+    }
+
+    function render() {
+        orbit.update();
+        lightHolder.quaternion.copy(camera.quaternion);
+        renderer.render(scene, camera);
+        requestAnimationFrame(render);
+    }
+
+</script>
+</body>
+</html>
