@@ -72,13 +72,13 @@
 
         renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
 
-        const ambientLight = new THREE.AmbientLight(0xffffff, .5);
+        const ambientLight = new THREE.AmbientLight(0xffffff, .75);
         scene.add(ambientLight);
 
         lightHolder = new THREE.Group();
         scene.add(lightHolder);
 
-        const staticLight = new THREE.DirectionalLight(0xffffff, 25);
+        const staticLight = new THREE.DirectionalLight(0xffffff, 20);
         staticLight.position.set(-16, 7, 6);
         staticLight.castShadow = true;
         lightHolder.add(staticLight);
@@ -91,28 +91,29 @@
         orbit.maxPolarAngle = .9 * Math.PI;
 
         const textureLoader = new THREE.TextureLoader();
-        let jackMaterial;
+        const normalMap = textureLoader.load('./model/normal-map.jpg')
+        const textureEquirec = textureLoader.load('./model/env-map.jpg');
+        textureEquirec.mapping = THREE.EquirectangularReflectionMapping;
+        textureEquirec.colorSpace = THREE.SRGBColorSpace;
+
+
+        const jackMaterial = new THREE.MeshPhongMaterial({
+            color: new THREE.Color(0xffeeaa),
+            emissive: new THREE.Color(0xffff00),
+            specular: new THREE.Color(0x000000),
+            envMap: textureEquirec,
+            envMapIntensity: .03
+        });
 
         modelLoader.load(
             "./model/model.glb",
             glb => {
-                const normalMap = textureLoader.load('./model/normal-map.jpg')
                 glb.scene.children.forEach(child => {
                     if (child.name.startsWith("body")) {
                         child.material.normalMap = normalMap;
                         child.material.normalMap.wrapS = child.material.normalMap.wrapT = THREE.RepeatWrapping;
                         child.material.normalScale = new THREE.Vector2(.4, -.4);
-                    } else if (child.name.startsWith("jack-1")) {
-                        jackMaterial = child.material.clone();
-                    }
-                });
-
-                jackMaterial.color = new THREE.Color(0xffcc55);
-                jackMaterial.metalness = 1;
-                jackMaterial.roughness = .15;
-
-                glb.scene.children.forEach(child => {
-                    if (child.name.startsWith("jack")) {
+                    } else if (child.name.startsWith("jack")) {
                         child.material = jackMaterial
                     }
                 });
