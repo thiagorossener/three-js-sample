@@ -85,22 +85,35 @@
 
 
         orbit = new OrbitControls(camera, canvasEl);
-        orbit.enableZoom = false;
+        orbit.enableZoom = true;
         orbit.enableDamping = true;
         orbit.minPolarAngle = .1 * Math.PI;
         orbit.maxPolarAngle = .9 * Math.PI;
 
-        const textureLoader = new THREE.TextureLoader()
+        const textureLoader = new THREE.TextureLoader();
+        let jackMaterial;
 
         modelLoader.load(
-            "./model/2_7.glb",
+            "./model/model.glb",
             glb => {
                 const normalMap = textureLoader.load('./model/normal-map.jpg')
                 glb.scene.children.forEach(child => {
-                    if (child.name.startsWith("Element_(base)")) {
+                    if (child.name.startsWith("body")) {
                         child.material.normalMap = normalMap;
                         child.material.normalMap.wrapS = child.material.normalMap.wrapT = THREE.RepeatWrapping;
                         child.material.normalScale = new THREE.Vector2(.4, -.4);
+                    } else if (child.name.startsWith("jack-1")) {
+                        jackMaterial = child.material.clone();
+                    }
+                });
+
+                jackMaterial.color = new THREE.Color(0xffcc55);
+                jackMaterial.metalness = 1;
+                jackMaterial.roughness = .15;
+
+                glb.scene.children.forEach(child => {
+                    if (child.name.startsWith("jack")) {
+                        child.material = jackMaterial
                     }
                 });
 
@@ -110,7 +123,13 @@
     }
 
     function updateSize() {
-        camera.aspect = containerEl.clientWidth / containerEl.clientHeight;
+        const ratio = containerEl.clientWidth / containerEl.clientHeight;
+        camera.aspect = ratio;
+        if (ratio < 1) {
+            camera.zoom = ratio;
+        } else {
+            camera.zoom = 1;
+        }
         camera.updateProjectionMatrix();
         renderer.setSize(containerEl.clientWidth, containerEl.clientHeight);
     }
