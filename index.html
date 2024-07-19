@@ -81,7 +81,7 @@
     window.addEventListener("resize", () => updateSize());
 
 
-    const highlightColor = new THREE.Color(0x550000);
+    const highlightColor = new THREE.Color(0x440000);
     const plasticColor = new THREE.Color(0x000000);
 
     orbit.addEventListener("start", () => {
@@ -120,7 +120,7 @@
                 doingSmoothReset = true;
                 plasticBottomMaterial.color = highlightColor;
                 gsap.to(wrapper.rotation, {
-                    x: 0.,
+                    x: .2,
                     y: -.4,
                     z: 0,
                 })
@@ -136,7 +136,7 @@
                 jackHighlightMaterial.color = highlightColor;
                 gsap.to(wrapper.rotation, {
                     x: .2,
-                    y: -.1,
+                    y: -.2,
                     z: .0
                 })
             }
