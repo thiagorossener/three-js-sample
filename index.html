@@ -8,7 +8,7 @@
         body {
             margin: 0;
             padding: 0;
-            background-color: #1F1F21;
+            background-color: #2F2F31;
         }
 
         .model-container {
@@ -18,6 +18,7 @@
             width: 80%;
             height: 80vh;
             border: 1px dotted grey;
+            background-color: #1F1F21;
         }
 
         canvas {
@@ -26,15 +27,19 @@
 
         .buttons-container {
             position: fixed;
-            top: 5%;
-            right: 5%;
+            top: 10%;
+            right: 10%;
             display: flex;
             flex-direction: column;
         }
-        button {
-            padding: 1em 2em;
-            margin-bottom: 1em;
+        .question {
+            margin: 1em 1em;
             cursor: pointer;
+            user-select: none;
+            color: white
+        }
+        .question:hover {
+            color: #ffaaaa;
         }
     </style>
 </head>
@@ -45,9 +50,9 @@
 </div>
 
 <div class="buttons-container">
-    <button id="fst-question">one</button>
-    <button id="scd-question">two</button>
-    <button id="trd-question">three</button>
+    <div class="question" >one</div>
+    <div class="question" >two</div>
+    <div class="question" >three</div>
 </div>
 
 <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/gsap.min.js"></script>
@@ -69,7 +74,7 @@
     const containerEl = document.querySelector(".model-container");
     const canvasEl = document.querySelector("#device-model");
 
-    const btns = Array.from(document.querySelectorAll("button"));
+    const btns = Array.from(document.querySelectorAll(".question"));
 
     let renderer, scene, camera, orbit, lightHolder, wrapper;
     let plasticTopMaterial, plasticBottomMaterial, jackHighlightMaterial;
