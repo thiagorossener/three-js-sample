@@ -187,7 +187,7 @@
         lightHolder = new THREE.Group();
         scene.add(lightHolder);
 
-        const staticLight = new THREE.DirectionalLight(0xffffff, 20);
+        const staticLight = new THREE.DirectionalLight(0xffffff, 12);
         staticLight.position.set(-16, 7, 1);
         lightHolder.add(staticLight);
         const sideLight = new THREE.DirectionalLight(0xffffff, 2);
@@ -230,6 +230,16 @@
                         child.material.normalMap.wrapS = child.material.normalMap.wrapT = THREE.RepeatWrapping;
                         child.material.normalScale = new THREE.Vector2(.4, -.4);
                         plasticTopMaterial = child.material.clone();
+                    }
+                    if (child.name.startsWith("bottom-body") || child.name.startsWith("top-body")) {
+                        child.material.normalMap = normalMap;
+                        child.material.normalMap.wrapS = child.material.normalMap.wrapT = THREE.RepeatWrapping;
+                        child.material.normalScale = new THREE.Vector2(.4, -.4);
+                    } else if (child.name.startsWith("input-highlight")) {
+                        child.material.normalMap = normalMap;
+                        child.material.normalMap.wrapS = child.material.normalMap.wrapT = THREE.RepeatWrapping;
+                        child.material.normalScale = new THREE.Vector2(.4, -.4);
+                        child.material.roughness = .7;
                     }
                     if (child.name.startsWith("jack") || child.name.startsWith("sleeve")) {
                         child.material = jackMaterial
