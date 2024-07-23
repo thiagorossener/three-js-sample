@@ -39,7 +39,7 @@
             color: white
         }
         .question:hover {
-            color: #ffaaaa;
+            color: #aaaaaa;
         }
     </style>
 </head>
@@ -104,7 +104,7 @@
                 doingSmoothReset = true;
                 gsap.to(plasticTopMaterial, {
                     duration: .2,
-                    opacity: .2
+                    opacity: .15
                 })
                 gsap.to(wrapper.rotation, {
                     x: .3,
@@ -116,7 +116,7 @@
             btn.addEventListener("click", onClick);
             btn.addEventListener("mouseleave", () => {
                 gsap.to(plasticTopMaterial, {
-                    duration: .2,
+                    duration: .5,
                     opacity: 0
                 })
             });
@@ -125,7 +125,7 @@
                 doingSmoothReset = true;
                 gsap.to(plasticBottomMaterial, {
                     duration: .2,
-                    opacity: .2
+                    opacity: .15
                 })
                 gsap.to(wrapper.rotation, {
                     x: .2,
@@ -137,7 +137,7 @@
             btn.addEventListener("click", onClick);
             btn.addEventListener("mouseleave", () => {
                 gsap.to(plasticBottomMaterial, {
-                    duration: .2,
+                    duration: .5,
                     opacity: 0
                 })
             });
@@ -158,7 +158,7 @@
             btn.addEventListener("click", onClick);
             btn.addEventListener("mouseleave", () => {
                 gsap.to(jackHighlightMaterial, {
-                    duration: .2,
+                    duration: .5,
                     opacity: 0
                 })
             });
@@ -236,7 +236,7 @@
                     }
                 });
 
-                plasticTopMaterial.color = new THREE.Color(0xff0000);
+                plasticTopMaterial.color = new THREE.Color(0xffffff);
                 plasticTopMaterial.transparent = true;
                 plasticTopMaterial.opacity = 0;
                 plasticTopMaterial.metalness = 0;
