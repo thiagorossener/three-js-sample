@@ -17,7 +17,6 @@
             left: 10%;
             width: 80%;
             height: 80vh;
-            border: 1px dotted grey;
             background-color: #1F1F21;
         }
 
@@ -244,6 +243,9 @@
                     if (child.name.startsWith("jack") || child.name.startsWith("sleeve")) {
                         child.material = jackMaterial
                     }
+                    if (child.name.startsWith("Red")) {
+                        console.log(child.material);
+                    }
                 });
 
                 plasticTopMaterial.color = new THREE.Color(0xffffff);
@@ -318,7 +320,7 @@
         orbit.enableDamping = true;
         orbit.minPolarAngle = .1 * Math.PI;
         orbit.maxPolarAngle = .9 * Math.PI;
-        orbit.enableZoom = false;
+        // orbit.enableZoom = false;
         orbit.enablePan = false;
         doingSmoothReset = false;
     }

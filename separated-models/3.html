@@ -1,0 +1,227 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <style>
+
+        html,
+        body {
+            margin: 0;
+            padding: 0;
+        }
+
+        .model-container {
+            position: fixed;
+            top: 10%;
+            left: 10%;
+            width: 80%;
+            height: 80vh;
+        }
+
+        canvas {
+            display: block;
+        }
+    </style>
+</head>
+<body>
+
+<div class="model-container">
+    <canvas id="device-model"></canvas>
+</div>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/gsap.min.js"></script>
+<script async src="https://unpkg.com/es-module-shims@1.6.3/dist/es-module-shims.js"></script>
+<script type="importmap">
+  {
+    "imports": {
+      "three": "https://unpkg.com/three@0.164.0/build/three.module.min.js",
+      "three/addons/": "https://unpkg.com/three@0.164.0/examples/jsm/"
+    }
+  }
+</script>
+
+<script type="module">
+    import * as THREE from "three";
+    import {GLTFLoader} from "three/addons/loaders/GLTFLoader.js";
+    import {OrbitControls} from "three/addons/controls/OrbitControls.js";
+
+    const containerEl = document.querySelector(".model-container");
+    const canvasEl = document.querySelector("#device-model");
+
+    let renderer, scene, camera, orbit, lightHolder;
+
+
+    initScene();
+    updateSize();
+    window.addEventListener("resize", () => updateSize());
+
+
+    function initScene() {
+        const modelLoader = new GLTFLoader();
+        scene = new THREE.Scene();
+
+        camera = new THREE.PerspectiveCamera(40, containerEl.clientWidth / containerEl.clientHeight, .1, 100);
+        camera.position.set(0, 0, 2.8)
+
+        renderer = new THREE.WebGLRenderer({
+            antialias: true,
+            alpha: true,
+            canvas: canvasEl
+        });
+
+        renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
+
+        const ambientLight = new THREE.AmbientLight(0xffffff, 2);
+        scene.add(ambientLight);
+
+        lightHolder = new THREE.Group();
+        scene.add(lightHolder);
+        const staticLight = new THREE.DirectionalLight(0xffffff, 45);
+        staticLight.position.set(-16, 7, 1);
+        lightHolder.add(staticLight);
+        const sideLight = new THREE.DirectionalLight(0xffffff, 20);
+        sideLight.position.set(5, 7, 2);
+        lightHolder.add(sideLight);
+
+
+        orbit = new OrbitControls(camera, canvasEl);
+        orbit.enableDamping = true;
+        orbit.minPolarAngle = .1 * Math.PI;
+        orbit.maxPolarAngle = .9 * Math.PI;
+        // orbit.enableZoom = false;
+        orbit.enablePan = false;
+
+        const textureLoader = new THREE.TextureLoader();
+        const normalMap = textureLoader.load('./assets/normal-map.jpg')
+        const textureEquirec = textureLoader.load('./assets/env-map.jpg');
+        textureEquirec.mapping = THREE.EquirectangularReflectionMapping;
+        textureEquirec.colorSpace = THREE.SRGBColorSpace;
+
+        const plasticMaterial = new THREE.MeshPhysicalMaterial({
+            color: new THREE.Color(0x000000),
+            emissive: new THREE.Color(0x111111),
+            ior: 1.5,
+            metalness: .866,
+            roughness: .455,
+            normalMap: normalMap,
+            normalScale: new THREE.Vector2(.4, -.4),
+            side: THREE.DoubleSide
+        });
+        plasticMaterial.normalMap.wrapS = plasticMaterial.normalMap.wrapT = THREE.RepeatWrapping;
+
+        const lighterPlasticMaterial = plasticMaterial.clone();
+        lighterPlasticMaterial.color = new THREE.Color(0x333333);
+        const whitePlastic = plasticMaterial.clone();
+        whitePlastic.color = new THREE.Color(0x666666);
+
+        const goldMaterial = new THREE.MeshStandardMaterial({
+            color: new THREE.Color(0x756815),
+            emissive: new THREE.Color(0x000000),
+            envMap: textureEquirec,
+            envMapIntensity: 2,
+            normalMap: normalMap,
+            roughness: .1,
+            metalness: 1,
+            normalScale: new THREE.Vector2(.1, -.1)
+        });
+
+        const whiteMetalMaterial = new THREE.MeshStandardMaterial({
+            color: new THREE.Color(0xccccff),
+            normalMap: normalMap,
+            envMap: textureEquirec,
+            envMapIntensity: 2,
+            roughness: .1,
+            metalness: 1,
+            normalScale: new THREE.Vector2(.1, -.1),
+        });
+
+        const redMaterial = new THREE.MeshStandardMaterial({
+            color: new THREE.Color(0xff1111),
+            normalMap: normalMap,
+            normalScale: new THREE.Vector2(.1, -.1)
+        });
+
+        const whiteMaterial = new THREE.MeshStandardMaterial({
+            color: new THREE.Color(0xffffff),
+            normalMap: normalMap,
+            normalScale: new THREE.Vector2(.1, -.1)
+        });
+
+        const textMaterial = new THREE.MeshStandardMaterial({
+            color: new THREE.Color(0xdddddd),
+        });
+
+        const screenMaterial = new THREE.MeshStandardMaterial({
+            color: new THREE.Color(0x111111),
+            envMap: textureEquirec,
+            envMapIntensity: 3,
+            roughness: .2,
+            metalness: 1,
+        });
+
+        const ringMaterial = new THREE.MeshStandardMaterial({
+            color: new THREE.Color(0xff6622),
+            emissive: new THREE.Color(0x000000),
+            envMap: textureEquirec,
+            envMapIntensity: 3,
+            roughness: .2,
+            metalness: 1,
+        });
+
+
+        modelLoader.load(
+            "./assets/separated-3.glb",
+            glb => {
+                glb.scene.children.forEach(child => {
+                    console.log(child.name)
+                    if (child.name === "case") {
+                        child.material = plasticMaterial;
+                    } else if (child.name.startsWith("case-bottom")) {
+                        child.material = lighterPlasticMaterial;
+                    } else if (child.name.startsWith("text")) {
+                        child.material = textMaterial;
+                    } else if (child.name.startsWith("jack") || child.name.startsWith("metal-jack") ) {
+                        child.material = goldMaterial;
+                    } else if (child.name.startsWith("red")) {
+                        child.material = redMaterial;
+                    } else if (child.name.startsWith("white")) {
+                        child.material = whiteMaterial;
+                    } else if (child.name === "metal") {
+                        child.material = whiteMetalMaterial;
+                    } else if (child.name.startsWith("screen")) {
+                        child.material = screenMaterial;
+                    } else if (child.name.startsWith("colored-ring")) {
+                        child.material = ringMaterial;
+                    } else if (child.name.startsWith("plastic-white")) {
+                        child.material = whitePlastic;
+                    }
+                });
+
+                scene.add(glb.scene);
+                render();
+            });
+    }
+
+    function updateSize() {
+        const ratio = containerEl.clientWidth / containerEl.clientHeight;
+        camera.aspect = ratio;
+        if (ratio < 1) {
+            camera.zoom = ratio;
+        } else {
+            camera.zoom = 1;
+        }
+        camera.updateProjectionMatrix();
+        renderer.setSize(containerEl.clientWidth, containerEl.clientHeight);
+    }
+
+
+    function render() {
+        orbit.update();
+        lightHolder.quaternion.copy(camera.quaternion);
+        renderer.render(scene, camera);
+        requestAnimationFrame(render);
+    }
+
+</script>
+</body>
+</html>
