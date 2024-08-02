@@ -61,7 +61,7 @@
         scene = new THREE.Scene();
 
         camera = new THREE.PerspectiveCamera(40, containerEl.clientWidth / containerEl.clientHeight, .1, 100);
-        camera.position.set(0, 0, 2.8)
+        camera.position.set(1.1, .7, 2.5);
 
         renderer = new THREE.WebGLRenderer({
             antialias: true,
@@ -88,7 +88,7 @@
         orbit.enableDamping = true;
         orbit.minPolarAngle = .1 * Math.PI;
         orbit.maxPolarAngle = .9 * Math.PI;
-        // orbit.enableZoom = false;
+        orbit.enableZoom = false;
         orbit.enablePan = false;
 
         const textureLoader = new THREE.TextureLoader();
@@ -128,7 +128,6 @@
             roughness: .1,
             metalness: 1,
             normalScale: new THREE.Vector2(.1, -.1),
-            side: THREE.BackSide
         });
 
         const redMaterial = new THREE.MeshStandardMaterial({
