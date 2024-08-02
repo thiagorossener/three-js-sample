@@ -134,7 +134,9 @@
         const redMaterial = new THREE.MeshStandardMaterial({
             color: new THREE.Color(0xff1111),
             normalMap: normalMap,
-            normalScale: new THREE.Vector2(.1, -.1)
+            normalScale: new THREE.Vector2(.1, -.1),
+            side: THREE.DoubleSide
+
         });
 
         const whiteMaterial = new THREE.MeshStandardMaterial({
@@ -152,7 +154,6 @@
             "./assets/separated-2.glb",
             glb => {
                 glb.scene.children.forEach(child => {
-                    console.log(child.name)
                     if (child.name === "case") {
                         child.material = plasticMaterial;
                     } else if (child.name.startsWith("text") || child.name.startsWith("btn-outline")) {
