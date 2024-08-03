@@ -119,17 +119,6 @@
             metalness: 1,
             normalScale: new THREE.Vector2(.1, -.1)
         });
-
-        const whiteMetalMaterial = new THREE.MeshStandardMaterial({
-            color: new THREE.Color(0xccccff),
-            normalMap: normalMap,
-            envMap: textureEquirec,
-            envMapIntensity: 2,
-            roughness: .1,
-            metalness: 1,
-            normalScale: new THREE.Vector2(.1, -.1),
-        });
-
         const redMaterial = new THREE.MeshStandardMaterial({
             color: new THREE.Color(0xff1111),
             normalMap: normalMap,
@@ -163,8 +152,6 @@
                         child.material = redMaterial;
                     } else if (child.name.startsWith("white")) {
                         child.material = whiteMaterial;
-                    } else if (child.name.startsWith("metal")) {
-                        child.material = whiteMetalMaterial;
                     }
                 });
 
