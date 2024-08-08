@@ -76,7 +76,7 @@
     const btns = Array.from(document.querySelectorAll(".question"));
 
     let renderer, scene, camera, orbit, lightHolder, wrapper, wrapperCopy;
-    let plasticTopMaterial, plasticBottomMaterial, jackHighlightMaterial;
+    let plasticTopHighlightMaterial, plasticBottomHighlightMaterial, jackHighlightMaterial;
     let doingSmoothReset = false;
 
 
@@ -101,7 +101,7 @@
         if (idx === 0) {
             const onClick = () => {
                 doingSmoothReset = true;
-                gsap.to(plasticTopMaterial, {
+                gsap.to([plasticTopHighlightMaterial, jackHighlightMaterial], {
                     duration: .2,
                     opacity: .1
                 })
@@ -114,7 +114,7 @@
             btn.addEventListener("mouseenter", onClick);
             btn.addEventListener("click", onClick);
             btn.addEventListener("mouseleave", () => {
-                gsap.to(plasticTopMaterial, {
+                gsap.to([plasticTopHighlightMaterial, jackHighlightMaterial], {
                     duration: .5,
                     opacity: 0
                 })
@@ -122,7 +122,7 @@
         } else if (idx === 1) {
             const onClick = () => {
                 doingSmoothReset = true;
-                gsap.to(plasticBottomMaterial, {
+                gsap.to(plasticBottomHighlightMaterial, {
                     duration: .2,
                     opacity: .1
                 })
@@ -135,7 +135,7 @@
             btn.addEventListener("mouseenter", onClick);
             btn.addEventListener("click", onClick);
             btn.addEventListener("mouseleave", () => {
-                gsap.to(plasticBottomMaterial, {
+                gsap.to(plasticBottomHighlightMaterial, {
                     duration: .5,
                     opacity: 0
                 })
@@ -145,7 +145,7 @@
                 doingSmoothReset = true;
                 gsap.to(jackHighlightMaterial, {
                     duration: .2,
-                    opacity: .4
+                    opacity: .5
                 })
                 gsap.to(wrapper.rotation, {
                     x: .2,
@@ -198,12 +198,24 @@
         finishReset();
 
         const textureLoader = new THREE.TextureLoader();
-        const normalMap = textureLoader.load('./model/normal-map.jpg')
-        const textureEquirec = textureLoader.load('./model/env-map.jpg');
+        const normalMap = textureLoader.load('./assets/normal-map.jpg')
+        const textureEquirec = textureLoader.load('./assets/env-map.jpg');
         textureEquirec.mapping = THREE.EquirectangularReflectionMapping;
         textureEquirec.colorSpace = THREE.SRGBColorSpace;
 
-        const jackMaterial = new THREE.MeshStandardMaterial({
+        const plasticMaterial = new THREE.MeshPhysicalMaterial({
+            color: new THREE.Color(0x000000),
+            emissive: new THREE.Color(0x070707),
+            ior: 1.5,
+            metalness: .866,
+            roughness: .455,
+            normalMap: normalMap,
+            normalScale: new THREE.Vector2(.4, -.4),
+            side: THREE.DoubleSide
+        });
+        plasticMaterial.normalMap.wrapS = plasticMaterial.normalMap.wrapT = THREE.RepeatWrapping;
+
+        const goldMaterial = new THREE.MeshStandardMaterial({
             color: new THREE.Color(0x756815),
             emissive: new THREE.Color(0x000000),
             envMap: textureEquirec,
@@ -213,67 +225,89 @@
             metalness: 1,
             normalScale: new THREE.Vector2(.1, -.1)
         });
+        const redMaterial = new THREE.MeshStandardMaterial({
+            color: new THREE.Color(0xff1111),
+            normalMap: normalMap,
+            normalScale: new THREE.Vector2(.1, -.1)
+        });
+
+        const whiteMaterial = new THREE.MeshStandardMaterial({
+            color: new THREE.Color(0xffffff),
+            normalMap: normalMap,
+            normalScale: new THREE.Vector2(.1, -.1)
+        });
+
+        const textMaterial = new THREE.MeshStandardMaterial({
+            color: new THREE.Color(0x888888),
+        });
+        plasticMaterial.normalMap.wrapS = plasticMaterial.normalMap.wrapT = THREE.RepeatWrapping;
+
+        const whiteMetalMaterial = new THREE.MeshStandardMaterial({
+            color: new THREE.Color(0x555544),
+            normalMap: normalMap,
+            envMap: textureEquirec,
+            envMapIntensity: 1,
+            roughness: .2,
+            metalness: 1,
+            normalScale: new THREE.Vector2(.1, -.1),
+        });
 
 
+        const lighterPlasticMaterial = plasticMaterial.clone();
+        lighterPlasticMaterial.color = new THREE.Color(0x333333);
+
+        plasticTopHighlightMaterial = plasticMaterial.clone();
+        plasticTopHighlightMaterial.color = new THREE.Color(0xffffff);
+        plasticTopHighlightMaterial.transparent = true;
+        plasticTopHighlightMaterial.opacity = 0;
+        plasticTopHighlightMaterial.metalness = 0;
+        plasticTopHighlightMaterial.roughness = 1;
+        plasticBottomHighlightMaterial = plasticTopHighlightMaterial.clone();
+        jackHighlightMaterial = plasticTopHighlightMaterial.clone();
 
         modelLoader.load(
-            "./model/model.glb",
+            "./assets/2-in-1.glb",
             glb => {
 
                 wrapper = new THREE.Group();
                 wrapperCopy = new THREE.Group();
 
                 glb.scene.children.forEach(child => {
-                    if (child.name.startsWith("bottom-body007")) {
-                        child.material.normalMap = normalMap;
-                        child.material.normalMap.wrapS = child.material.normalMap.wrapT = THREE.RepeatWrapping;
-                        child.material.normalScale = new THREE.Vector2(.4, -.4);
-                        plasticTopMaterial = child.material.clone();
-                    }
-                    if (child.name.startsWith("bottom-body") || child.name.startsWith("top-body")) {
-                        child.material.normalMap = normalMap;
-                        child.material.normalMap.wrapS = child.material.normalMap.wrapT = THREE.RepeatWrapping;
-                        child.material.normalScale = new THREE.Vector2(.4, -.4);
-                    } else if (child.name.startsWith("input-highlight")) {
-                        child.material.normalMap = normalMap;
-                        child.material.normalMap.wrapS = child.material.normalMap.wrapT = THREE.RepeatWrapping;
-                        child.material.normalScale = new THREE.Vector2(.4, -.4);
-                        // child.material.roughness = .7;
-                    }
-                    if (child.name.startsWith("jack") || child.name.startsWith("sleeve")) {
-                        child.material = jackMaterial
-                    }
-                    if (child.name.startsWith("Red")) {
-                        console.log(child.material);
+                    if (child.name.startsWith("case") || child.name.startsWith("input-to-highlight")) {
+                        child.material = plasticMaterial;
+                    } else if (child.name.startsWith("sleeve")) {
+                        child.material = goldMaterial;
+                    } else if (child.name.startsWith("text") || child.name.startsWith("btn-outline")) {
+                        child.material = textMaterial;
+                    } else if (child.name.startsWith("jack")) {
+                        child.material = goldMaterial;
+                    } else if (child.name.startsWith("red")) {
+                        child.material = redMaterial;
+                    } else if (child.name.startsWith("white")) {
+                        child.material = whiteMaterial;
+                    } else if (child.name.startsWith("metal")) {
+                        child.material = whiteMetalMaterial;
+                    } else if (child.name.startsWith("light-plastic")) {
+                        child.material = lighterPlasticMaterial;
                     }
                 });
-
-                plasticTopMaterial.color = new THREE.Color(0xffffff);
-                plasticTopMaterial.transparent = true;
-                plasticTopMaterial.opacity = 0;
-                plasticTopMaterial.metalness = 0;
-                plasticTopMaterial.roughness = 1;
-                plasticBottomMaterial = plasticTopMaterial.clone();
-                jackHighlightMaterial = plasticTopMaterial.clone();
 
                 scene.add(wrapper);
                 wrapper.add(glb.scene);
 
                 scene.add(wrapperCopy);
+                wrapperCopy.scale.set(1.01, 1.01, 1.01);
                 wrapperCopy.add(wrapper.clone());
 
-                wrapperCopy.scale.set(1.01, 1.01, 1.01);
-
                 wrapperCopy.children[0].children[0].children.forEach(child => {
-                    if (child.name.startsWith("bottom-body")) {
-                        child.material = plasticBottomMaterial;
-                    } else if (child.name.startsWith("top-body")) {
-                        child.material = plasticTopMaterial
-                    } else if (child.name.startsWith("input-highlight")) {
+
+                    if (child.name === "case-bottom") {
+                        child.material = plasticBottomHighlightMaterial;
+                    } else if (child.name === "case-top" || child.name.startsWith("sleeve")) {
+                        child.material = plasticTopHighlightMaterial
+                    } else if (child.name.startsWith("input-to-highlight")) {
                         child.material = jackHighlightMaterial
-                    } else if (child.name.startsWith("jack") || child.name.startsWith("sleeve")) {
-                        child.material = jackMaterial
-                    } else if (child.name.startsWith("Text") || child.name.startsWith("LOGO") || child.name.startsWith("Outline")) {
+                    } else if (child.name.startsWith("text")) {
                         child.visible = false;
                     }
                 });
@@ -324,7 +358,6 @@
         orbit.enablePan = false;
         doingSmoothReset = false;
     }
-
 
     function render() {
         if (doingSmoothReset) {

@@ -92,7 +92,6 @@
         orbit.enablePan = false;
 
         const textureLoader = new THREE.TextureLoader();
-        const backEngAlphaMap = textureLoader.load('./assets/EL3-text.png')
         const normalMap = textureLoader.load('./assets/normal-map.jpg')
         const textureEquirec = textureLoader.load('./assets/env-map.jpg');
         textureEquirec.mapping = THREE.EquirectangularReflectionMapping;
@@ -110,11 +109,6 @@
         });
         plasticMaterial.normalMap.wrapS = plasticMaterial.normalMap.wrapT = THREE.RepeatWrapping;
 
-        const lighterPlasticMaterial = plasticMaterial.clone();
-        lighterPlasticMaterial.color = new THREE.Color(0x333333);
-        const whitePlastic = plasticMaterial.clone();
-        whitePlastic.color = new THREE.Color(0x666666);
-
         const goldMaterial = new THREE.MeshStandardMaterial({
             color: new THREE.Color(0x756815),
             emissive: new THREE.Color(0x000000),
@@ -126,10 +120,22 @@
             normalScale: new THREE.Vector2(.1, -.1)
         });
 
+        const whiteMetalMaterial = new THREE.MeshStandardMaterial({
+            color: new THREE.Color(0x555544),
+            normalMap: normalMap,
+            envMap: textureEquirec,
+            envMapIntensity: 1,
+            roughness: .2,
+            metalness: 1,
+            normalScale: new THREE.Vector2(.1, -.1),
+        });
+
         const redMaterial = new THREE.MeshStandardMaterial({
             color: new THREE.Color(0xff1111),
             normalMap: normalMap,
-            normalScale: new THREE.Vector2(.1, -.1)
+            normalScale: new THREE.Vector2(.1, -.1),
+            side: THREE.DoubleSide
+
         });
 
         const whiteMaterial = new THREE.MeshStandardMaterial({
@@ -142,53 +148,28 @@
             color: new THREE.Color(0xdddddd),
         });
 
-        const screenMaterial = new THREE.MeshStandardMaterial({
-            color: new THREE.Color(0x111111),
-            envMap: textureEquirec,
-            envMapIntensity: 3,
-            roughness: .2,
-            metalness: 1,
-        });
-
-        const ringMaterial = new THREE.MeshStandardMaterial({
-            color: new THREE.Color(0x66290e),
-            envMap: textureEquirec,
-            envMapIntensity: 3,
-            roughness: .3,
-            metalness: 1,
-        });
-
-        const backEngMaterial = new THREE.MeshBasicMaterial({
-            color: 0xfffffff,
-            alphaMap: backEngAlphaMap,
-            transparent: true,
-        });
+        const lighterPlasticMaterial = plasticMaterial.clone();
+        lighterPlasticMaterial.color = new THREE.Color(0x333333);
 
 
         modelLoader.load(
-            "./assets/separated-3.glb",
+            "./assets/separated-2.glb",
             glb => {
                 glb.scene.children.forEach(child => {
                     if (child.name === "case") {
                         child.material = plasticMaterial;
-                    } else if (child.name.startsWith("case-bottom")) {
-                        child.material = lighterPlasticMaterial;
-                    } else if (child.name === "text") {
+                    } else if (child.name.startsWith("text") || child.name.startsWith("btn-outline")) {
                         child.material = textMaterial;
-                    } else if (child.name.startsWith("jack") || child.name.startsWith("metal-jack") ) {
+                    } else if (child.name.startsWith("jack")) {
                         child.material = goldMaterial;
                     } else if (child.name.startsWith("red")) {
                         child.material = redMaterial;
                     } else if (child.name.startsWith("white")) {
                         child.material = whiteMaterial;
-                    } else if (child.name.startsWith("screen")) {
-                        child.material = screenMaterial;
-                    } else if (child.name.startsWith("colored-ring")) {
-                        child.material = ringMaterial;
-                    } else if (child.name.startsWith("plastic-white")) {
-                        child.material = whitePlastic;
-                    } else if (child.name.startsWith("text-plane")) {
-                        child.material = backEngMaterial;
+                    } else if (child.name.startsWith("metal")) {
+                        child.material = whiteMetalMaterial;
+                    } else if (child.name.startsWith("case-bottom")) {
+                        child.material = lighterPlasticMaterial;
                     }
                 });
 
